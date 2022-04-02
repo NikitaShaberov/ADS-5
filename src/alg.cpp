@@ -56,24 +56,22 @@ std::string infx2pstfx(std::string inf) {
           i++;
         }
         res += ' ';
-      }
-      else {
+      } else {
         razdel(inf[i], &res);
       }
       continue;
     }
-    if (stack1.isEmpty() || getPrior(inf[i]) == 0 || getPrior(inf[i]) > getPrior(stack1.get())) {
+    if (stack1.isEmpty() || getPrior(inf[i]) == 0 
+        || getPrior(inf[i]) > getPrior(stack1.get())) {
       stack1.push(inf[i]);
-    }
-    else {
+    } else {
       if (getPrior(inf[i]) == 1) {
         while (getPrior(stack1.get()) != 0) {
           razdel(stack1.get(), &res);
           stack1.pop();
         }
         stack1.pop();
-      }
-      else if (getPrior(inf[i]) <= getPrior(stack1.get())) {
+      } else if (getPrior(inf[i]) <= getPrior(stack1.get())) {
         while (getPrior(stack1.get()) > 1) {
           razdel(stack1.get(), &res);
           stack1.pop();
