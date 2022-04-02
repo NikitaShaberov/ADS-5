@@ -61,7 +61,7 @@ std::string infx2pstfx(std::string inf) {
       }
       continue;
     }
-    if (stack1.isEmpty() || getPrior(inf[i]) == 0 
+    if (stack1.isEmpty() || getPrior(inf[i]) == 0
         || getPrior(inf[i]) > getPrior(stack1.get())) {
       stack1.push(inf[i]);
     } else {
@@ -111,4 +111,4 @@ int eval(std::string post) {
     }
   }
   return stack2.get();
-}   
+}
