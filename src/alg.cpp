@@ -3,89 +3,112 @@
 #include <map>
 #include "tstack.h"
 
-int priority(char op) {
-  switch (op) {
-    case '(': return 0;
-    case ')': return 1;
-    case '+': return 2;
-    case '-': return 2;
-    case '*': return 3;
-    case '/': return 3;
-    default: return 4;
+
+int getPriorite(char sim) {
+  switch (sim) {
+    case '(':
+      return 0;
+    case ')':
+      return 1;
+    case '+':
+      return 2;
+    case '-':
+      return 2;
+    case '*':
+      return 3;
+    case '/':
+      return 3;
+    case ' ':
+      return -2;
+    default:
+      return -1;
   }
 }
 
-int calc(char op, int x, int y) {
-  switch (op) {
-    case '+': return x + y;
-    case '-': return x - y;
-    case '*': return x * y;
-    case '/': return x / y;
-  }
-  return 0;
+void split(char sim, std::string* str) {
+  *str += sim;
+  *str += ' ';
 }
 
+int count(int a, int b, char c) {
+  switch (c) {
+    case '+':
+      return b + a;
+    case '-':
+      return b - a;
+    case '*':
+      return b * a;
+    case '/':
+      return b / a;
+    default:
+      throw "Error perform actions!";
+  }
+}
 
 std::string infx2pstfx(std::string inf) {
-  std::string end = "";
-  TStack <char, 100> charstack;
-for (int i = 0; i < inf.length(); i++) {
-  if (priority(inf[i]) == 4) {
-    end += inf[i];
-  } else if (priority(inf[i]) > 1 && priority(inf[i]) < 4) {
-      if (charstack.isEmpty() || priority(charstack.get()) == 0) {
-        charstack.push(inf[i]);
-          end += " ";
-         } else if (priority(inf[i]) > priority(charstack.get())) {
-             charstack.push(inf[i]);
-             end += " ";
-         } else if (priority(inf[i]) <= priority(charstack.get())) {
-             end += " ";
-             end += charstack.get();
-             charstack.pop();
-             end += " ";
-             while ((priority(inf[i]) <= priority(charstack.get())
-             || priority(charstack.get()) != 0) && !charstack.isEmpty()) {
-               end += " ";
-               end += charstack.get();
-               charstack.pop();
-               end += " ";
-             }
-             charstack.push(inf[i]);
-          }
-        } else if (priority(inf[i]) == 0) {
-            charstack.push(inf[i]);
-        } else if (priority(inf[i]) == 1) {
-            while (priority(charstack.get()) != 0) {
-              end += " ";
-              end += charstack.get();
-              charstack.pop();
-            }
-            charstack.pop();
+  TStack<char, 128> stack1;
+  std::string res = "";
+  for (int i = 0; i < inf.length(); i++) {
+    if (getPriorite(inf[i]) == -1) {
+      if (i < inf.length() && getPriorite(inf[i + 1]) == -1) {
+        while (i < inf.length() && getPriorite(inf[i]) == -1) {
+          res += inf[i];
+          i++;
         }
+        res += ' ';
+      } else {
+        split(inf[i], &res);
+      }
+      continue;
     }
-    while (!charstack.isEmpty()) {
-      end += " ";
-      end += charstack.get();
-      charstack.pop();
+    if (stack1.isEmpty() ||getPriorite(inf[i]) == 0
+        || getPriorite(inf[i]) > getPriorite(stack1.get())) {
+      stack1.push(inf[i]);
+    } else {
+      if (getPriorite(inf[i]) == 1) {
+        while (getPriorite(stack1.get()) != 0) {
+          split(stack1.get(), &res);
+          stack1.pop();
+        }
+        stack1.pop();
+      } else if (getPriorite(inf[i]) <=getPriorite(stack1.get())) {
+        while (getPriorite(stack1.get()) > 1) {
+          split(stack1.get(), &res);
+          stack1.pop();
+        }
+        stack1.push(inf[i]);
+      }
     }
-  return end;
+  }
+  while (!stack1.isEmpty()) {
+    if (getPriorite(stack1.get()) > 1) {
+      split(stack1.get(), &res);
+    }
+    stack1.pop();
+  }
+  res.pop_back();
+  return res;
 }
-
-int eval(std::string postf) {
-TStack <int, 100> numstack;
-int sum = 0, x = 0, y = 0;
-for (int i = 0; i < postf.size(); i+=2) {
-  if (priority(postf[i]) == 4) {
-    numstack.push(atoi(&postf[i]));
-  } else {
-      y = numstack.get();
-      numstack.pop();
-      x = numstack.get();
-      numstack.pop();
-      sum = calc(postf[i], x, y);
-      numstack.push(sum);
+int eval(std::string post) {
+  TStack<int, 100> stack2;
+  for (int i = 0; i < post.length(); i++) {
+    int r = i;
+    std::string temp = "";
+    while (getPriorite(post[r]) == -1) {
+      temp += post[r];
+      r++;
     }
-}
-return sum;
+    i = r;
+    if (getPriorite(post[i]) > 1) {
+      int a = stack2.get();
+      stack2.pop();
+      int b = stack2.get();
+      stack2.pop();
+      stack2.push(count(a, b, post[i]));
+    }
+    if (temp != "") {
+      stack2.push(std::stoi(temp));
+    }
+  }
+  return stack2.get();
 }
