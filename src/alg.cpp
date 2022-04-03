@@ -10,5 +10,5 @@ std::string infx2pstfx(std::string inf) {
 
 int eval(std::string pref) {
   // добавьте код
-  return 0;
+  return 0;d
 }
